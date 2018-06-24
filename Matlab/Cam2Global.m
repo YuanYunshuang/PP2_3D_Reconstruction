@@ -16,7 +16,7 @@ lt = length(T);
 pointer = 3;
 %% Do transformation for each point cloud file
 
-for i=203:length(pcFileList)
+for i=1:length(pcFileList)
     tic
     filename = strcat('G:\PP2\pointcloud\',pcFileList(i).name);
     pointcloud = importdata(filename);
