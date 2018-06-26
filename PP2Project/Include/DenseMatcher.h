@@ -12,7 +12,7 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-using namespace cv;
+//using namespace cv;
 using namespace std;
 
 //******************************************************************************************
@@ -39,7 +39,7 @@ public:
 	// Return:	img1 and img2			--> the two rectified epipolar images
 	//			disp12					--> the disparity map (Type CV_32FC1)
 	*/
-	bool matchStereoPair(string fnEpi1, string fnEpi2, Mat &img1, Mat &img2, Mat &disp12, string matcherType);	
+	bool matchStereoPair(string fnEpi1, string fnEpi2, cv::Mat &img1, cv::Mat &img2, cv::Mat &disp12, string matcherType);
 
 	//====================================================================================================
 private:

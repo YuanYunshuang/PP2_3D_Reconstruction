@@ -16,12 +16,12 @@ StereoRectifier::~StereoRectifier()
 bool StereoRectifier::initIntrinsics(string fnIntrinsics)
 {
 	bool ret = true;
-	FileStorage fs1(fnIntrinsics, FileStorage::READ);
+	cv::FileStorage fs1(fnIntrinsics, cv::FileStorage::READ);
 
 	if (!fs1.isOpened()) return false;
-	Mat q1, q2;
+	cv::Mat q1, q2;
 	int stat1, stat2;
-	Size s1, s2;
+	cv::Size s1, s2;
 
 	fs1["M1"] >> this->K1;
 	fs1["D1"] >> this->d1;
@@ -45,12 +45,12 @@ bool StereoRectifier::initIntrinsics(string fnIntrinsics)
 bool StereoRectifier::initExtrinsics(string fnExtrinsics)
 {
 	bool ret = true;
-	FileStorage fs1(fnExtrinsics, FileStorage::READ);
+	cv::FileStorage fs1(fnExtrinsics, cv::FileStorage::READ);
 
 	if (!fs1.isOpened()) return false;
-	Mat q1, q2;
-	int stat1, stat2;
-	Size s1, s2;
+	cv::Mat q1, q2;
+	//int stat1, stat2;
+	cv::Size s1, s2;
 
 	fs1["R1"] >> this->R1;
 	fs1["R2"] >> this->R2;
@@ -64,44 +64,44 @@ bool StereoRectifier::initExtrinsics(string fnExtrinsics)
 }
 
 //====================================================================================================
-bool StereoRectifier::calcRelativeOrientation(Mat &imgLeft, Mat &imgRight, string FeatureDescriptor, Mat &R, Mat &T, bool visualizeKeypts)
+bool StereoRectifier::calcRelativeOrientation(cv::Mat &imgLeft, cv::Mat &imgRight, string FeatureDescriptor, cv::Mat &R, cv::Mat &T, bool visualizeKeypts)
 {
 	bool ret = true;
 
 	// Get feature extractor
-	Ptr<Feature2D> f2d;
-	if (FeatureDescriptor == "SIFT")		f2d = xfeatures2d::SIFT::create();
-	else if (FeatureDescriptor == "SURF")	f2d = xfeatures2d::SURF::create();
-	else if (FeatureDescriptor == "ORB")	f2d = ORB::create();
+	cv::Ptr<cv::Feature2D> f2d;
+	if (FeatureDescriptor == "SIFT")		f2d = cv::xfeatures2d::SIFT::create();
+	else if (FeatureDescriptor == "SURF")	f2d = cv::xfeatures2d::SURF::create();
+	else if (FeatureDescriptor == "ORB")	f2d = cv::ORB::create();
 	else { ret = false; cerr << "No valid feature descriptor" << endl; }
 
 	// detect the keypoints	
-	vector<KeyPoint> kpleft, kpright;
+	vector<cv::KeyPoint> kpleft, kpright;
 	f2d->detect(imgLeft, kpleft);
 	f2d->detect(imgRight, kpright);
 
 	// get the descriptors
-	Mat desleft, desright;
+	cv::Mat desleft, desright;
 	f2d->compute(imgLeft, kpleft, desleft);
 	f2d->compute(imgRight, kpright, desright);
 
 	// match the keypoints
-	BFMatcher matcher;
-	vector< DMatch > matches;
+	cv::BFMatcher matcher;
+	vector<cv::DMatch > matches;
 	matcher.match(desleft, desright, matches);
-	vector<Point2d> imgPtsLeft, imgPtsRight;
+	vector<cv::Point2d> imgPtsLeft, imgPtsRight;
 	imgPtsLeft.reserve(matches.size());
 	imgPtsRight.reserve(matches.size());
 	for (int i = 0; i < matches.size(); i++)
 	{
 		int leftIdx = matches[i].queryIdx;
 		int rightIdx = matches[i].trainIdx;
-		imgPtsLeft.push_back(Point2d(kpleft[leftIdx].pt));
-		imgPtsRight.push_back(Point2d(kpright[rightIdx].pt));
+		imgPtsLeft.push_back(cv::Point2d(kpleft[leftIdx].pt));
+		imgPtsRight.push_back(cv::Point2d(kpright[rightIdx].pt));
 	}
 
 	// undistort keypoints --> undistorted points will have f = 1.0 and pp = (0.0, 0.0)
-	vector<Point2d> imgPtsLeftUndist, imgPtsRightUndist;
+	vector<cv::Point2d> imgPtsLeftUndist, imgPtsRightUndist;
 
 	undistortPoints(imgPtsLeft, imgPtsLeftUndist, K1, d1);
 	undistortPoints(imgPtsRight, imgPtsRightUndist, K2, d2);
@@ -110,8 +110,8 @@ bool StereoRectifier::calcRelativeOrientation(Mat &imgLeft, Mat &imgRight, strin
 	double confidence = 0.999;
 	double reprojThreshold = 3.0;
 	vector<uchar> inliers;
-	Mat E = findEssentialMat(imgPtsLeftUndist, imgPtsRightUndist, 1.0, Point2d(0.0, 0.0), RANSAC, confidence, reprojThreshold / K1.at<double>(0, 0), inliers);
-	vector<Point2d> imgPtsLeftInliers, imgPtsRightInliers;
+	cv::Mat E = findEssentialMat(imgPtsLeftUndist, imgPtsRightUndist, 1.0, cv::Point2d(0.0, 0.0), cv::RANSAC, confidence, reprojThreshold / K1.at<double>(0, 0), inliers);
+	vector<cv::Point2d> imgPtsLeftInliers, imgPtsRightInliers;
 	vector<int> inlierIdx;
 	inlierIdx.reserve(imgPtsLeft.size());
 	imgPtsLeftInliers.reserve(imgPtsLeft.size());
@@ -131,44 +131,44 @@ bool StereoRectifier::calcRelativeOrientation(Mat &imgLeft, Mat &imgRight, strin
 
 	if (visualizeKeypts)
 	{
-		Mat imgKeypts = imgLeft.clone();		
+		cv::Mat imgKeypts = imgLeft.clone();
 		for (int i = 0; i < inlierIdx.size(); i++)
 		{
 			int currIdx = inlierIdx[i];
-			circle(imgKeypts, imgPtsLeft[currIdx], 2, Scalar(0.0, 0.0, 255.0), 1);
+			circle(imgKeypts, imgPtsLeft[currIdx], 2, cv::Scalar(0.0, 0.0, 255.0), 1);
 		}
-		namedWindow("Keypoints", WINDOW_AUTOSIZE);
-		imshow("Keypoints", imgKeypts);
-		waitKey(0);
+		cv::namedWindow("Keypoints", cv::WINDOW_AUTOSIZE);
+		cv::imshow("Keypoints", imgKeypts);
+		cv::waitKey(0);
 	}
 
 	return ret;
 }
 
 //====================================================================================================
-bool StereoRectifier::calcRectification(Mat &R, Mat &T, Size &imgsize, Mat &R1, Mat &R2, Mat &P1, Mat &P2, Mat &Q)
+bool StereoRectifier::calcRectification(cv::Mat &R, cv::Mat &T, cv::Size &imgsize, cv::Mat &R1, cv::Mat &R2, cv::Mat &P1, cv::Mat &P2, cv::Mat &Q)
 {
 	bool ret = true;
-	Size newImgSize = imgsize;
-	stereoRectify(this->K1, this->d1, this->K2, this->d2, imgsize, R, T, R1, R2, P1, P2, Q, CALIB_ZERO_DISPARITY, 0.0, newImgSize);
+	cv::Size newImgSize = imgsize;
+	stereoRectify(this->K1, this->d1, this->K2, this->d2, imgsize, R, T, R1, R2, P1, P2, Q, cv::CALIB_ZERO_DISPARITY, 0.0, newImgSize);
 	return ret;
 }
 
 //====================================================================================================
-bool StereoRectifier::rectifyImages(Mat &img1, Mat &img2, Mat &imgR1, Mat &imgR2, Mat &Rrect1, Mat &Rrect2, Mat &Knew1, Mat &Knew2, Size &imgSize)
+bool StereoRectifier::rectifyImages(cv::Mat &img1, cv::Mat &img2, cv::Mat &imgR1, cv::Mat &imgR2, cv::Mat &Rrect1, cv::Mat &Rrect2, cv::Mat &Knew1, cv::Mat &Knew2, cv::Size &imgSize)
 {
 	bool ret = true;
-	Mat rmap[2][2];
+	cv::Mat rmap[2][2];
 	initUndistortRectifyMap(K1, d1, Rrect1, Knew1, imgSize, CV_16SC2, rmap[0][0], rmap[0][1]);
 	initUndistortRectifyMap(K2, d2, Rrect2, Knew2, imgSize, CV_16SC2, rmap[1][0], rmap[1][1]);
-	remap(img1, imgR1, rmap[0][0], rmap[0][1], INTER_LINEAR);
-	remap(img2, imgR2, rmap[1][0], rmap[1][1], INTER_LINEAR);
+	remap(img1, imgR1, rmap[0][0], rmap[0][1], cv::INTER_LINEAR);
+	remap(img2, imgR2, rmap[1][0], rmap[1][1], cv::INTER_LINEAR);
 
 	return ret;
 }
 
 //====================================================================================================
-bool StereoRectifier::rectifyImages(Mat &img1, Mat &img2, Mat &imgR1, Mat &imgR2, Size &imgSize)
+bool StereoRectifier::rectifyImages(cv::Mat &img1, cv::Mat &img2, cv::Mat &imgR1, cv::Mat &imgR2, cv::Size &imgSize)
 {
 	bool ret = true;
 	if (this->R1.empty() || this->R2.empty())
@@ -181,15 +181,15 @@ bool StereoRectifier::rectifyImages(Mat &img1, Mat &img2, Mat &imgR1, Mat &imgR2
 }
 
 //====================================================================================================
-bool StereoRectifier::calcEulerAngles(Mat &R, Vec3f &eulerangles)
+bool StereoRectifier::calcEulerAngles(cv::Mat &R, cv::Vec3f &eulerangles)
 {
 	bool ret = true;
 
 	// check if R is rotation matrix
-	Mat Rt;
+	cv::Mat Rt;
 	transpose(R, Rt);
-	Mat shouldBeIdentity = Rt * R;
-	Mat I = Mat::eye(3, 3, shouldBeIdentity.type());
+	cv::Mat shouldBeIdentity = Rt * R;
+	cv::Mat I = cv::Mat::eye(3, 3, shouldBeIdentity.type());
 
 	ret = norm(I, shouldBeIdentity) < 1e-6;
 
@@ -212,7 +212,7 @@ bool StereoRectifier::calcEulerAngles(Mat &R, Vec3f &eulerangles)
 			y = atan2(-R.at<double>(2, 0), sy);
 			z = 0;
 		}
-		eulerangles = Vec3f(x, y, z);
+		eulerangles = cv::Vec3f(x, y, z);
 	}
 	return ret;
 }

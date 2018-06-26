@@ -46,10 +46,10 @@ target_link_libraries(
 	${PROJECT_NAME}
 	${OpenCV_LIBS}	
 	
-	debug			../lib_elasstereo/bin/Debug/ElasMatcher_d
+	debug			E:/PraxisProjekt2/lib_elasstereo/bin/Debug/ElasMatcher_d
 	optimized		../lib_elasstereo/bin/Release/ElasMatcher
 	
-	debug 			../lib_spsstereo/Debug/spsstereo_d
+	debug 			E:/PraxisProjekt2/lib_spsstereo/Debug/spsstereo_d
 	optimized		../lib_spsstereo/Release/spsstereo
 	
 	debug			libpngd

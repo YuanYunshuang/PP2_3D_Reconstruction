@@ -21,7 +21,6 @@
 #include "StereoRectifier.h"
 
 using namespace std;
-using namespace cv;
 
 class PtGenerator
 {
@@ -39,12 +38,12 @@ private:
 	string pDisp;
 
 	//matrix
-	Mat origleft;
-	Mat origright;
-	Mat epileft;
-	Mat epiright;
-	Mat disp;
-	Mat disp8;
+	cv::Mat origleft;
+	cv::Mat origright;
+	cv::Mat epileft;
+	cv::Mat epiright;
+	cv::Mat disp;
+	cv::Mat disp8;
 
 public:
 	PtGenerator();

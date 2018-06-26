@@ -1,7 +1,8 @@
 #include "PtGenerator.h"
 #include <stdio.h>  
 #include <string.h> 
-#include <direct.h>  
+#include <direct.h>   
+#include <dirent.h>
 #include <io.h>
 
 
@@ -25,39 +26,45 @@ PtGenerator::~PtGenerator()
 
 
 bool PtGenerator::GeneratePointCloud(bool saveEpiImg, bool saveDisparityImg) {
-	origleft = imread(pImgLeft);
-	origright = imread(pImgLeft);
-
+	origleft = cv::imread(pImgLeft);
+	origright = cv::imread(pImgLeft);
+	double resizefactor = 0.5;
 	StereoRectifier rectifier;
 	rectifier.initIntrinsics(pIntrinsics);
 	rectifier.initExtrinsics(PExtrinsics);
 	rectifier.rectifyImages(origleft, origright, epileft, epiright, origleft.size());
+/*	if (saveEpiImg) {
+		try {
+			cv::imwrite(pEpiLeft, epileft);
+			cv::imwrite(pEpiRight, epiright);
+		}
+		catch (runtime_error& ex) {
+			fprintf(stderr, "Exception converting image to PNG format: %s\n", ex.what());
+			return 1;
+		}
+	}*/
+
+	cv::Mat epileftsmall;
+	cv::Mat epirightsmall;
+	cv::resize(epileft, epileftsmall, epileftsmall.size(), resizefactor, resizefactor);
+	cv::resize(epiright, epirightsmall, epirightsmall.size(), resizefactor, resizefactor);
 	if (saveEpiImg) {
 		try {
-			imwrite(pEpiLeft, epileft);
-			imwrite(pEpiRight, epiright);
+			cv::imwrite(pEpiLeft, epileftsmall);
+			cv::imwrite(pEpiRight, epirightsmall);
 		}
 		catch (runtime_error& ex) {
 			fprintf(stderr, "Exception converting image to PNG format: %s\n", ex.what());
 			return 1;
 		}
 	}
-
-/*	Mat epileftsmall;
-	Mat epirightsmall;
-	resize(epileft, epileftsmall, epileftsmall.size(), 2.0, 2.0);
-	resize(epiright, epirightsmall, epirightsmall.size(), 0.5, 0.5);
-	string fnepileftsmall = "E:/PraxisProjekt2/data/IKGVAN/Scenario_1/epileftsmall/000200.png";
-	string fnepirightsmall = "E:/PraxisProjekt2/data/IKGVAN/Scenario_1/epirightsmall/000200.png";
-	imwrite(fnepileftsmall, epileftsmall);
-	imwrite(fnepirightsmall, epirightsmall);*/
 
 
 	DenseMatcher matcher;
-	matcher.matchStereoPair(pEpiLeft, pEpiRight, epileft, epiright, disp, "ELAS"); //Alternative SPSS
+	matcher.matchStereoPair(pEpiLeft, pEpiRight, epileftsmall, epirightsmall, disp, "SPSS"); //Alternative SPSS
 	if (saveDisparityImg) {
 		try {
-			imwrite(pDisp, disp);
+			cv::imwrite(pDisp, disp8);
 		}
 		catch (runtime_error& ex) {
 			fprintf(stderr, "Exception converting image to PNG format: %s\n", ex.what());
@@ -65,24 +72,31 @@ bool PtGenerator::GeneratePointCloud(bool saveEpiImg, bool saveDisparityImg) {
 		}
 	}
 
-
-
 	disp.convertTo(disp8, CV_8UC1);
 
-	Mat Q = rectifier.getQ();
-	Mat xyz;
+	cv::Mat Q = rectifier.getQ();
+	cv::Mat xyz;
 	Q.at<double>(3, 1) /= 0.8466;
+	Q.at<double>(0, 3) *= resizefactor;
+	Q.at<double>(1, 3) *= resizefactor;
+	Q.at<double>(2, 3) *= resizefactor;
 	reprojectImageTo3D(disp, xyz, Q);
+	double B = 0.8466;
+	double f = Q.at<double>(2, 3);
+	double sigma_z = 1.5;
+	double d_min = sqrt((-f*B) / (sigma_z));
+	double z = (-f*B) / d_min;
+
 	ofstream output(pOutput);
 	for (int r = 0; r < xyz.rows; r++)
 	{
 		for (int c = 0; c < xyz.cols; c++)
 		{
-			Mat disparity = disp;
-			if (disparity.at<float>(r, c) > 20.0)
+			//Mat disparity = disp;
+			if (disp.at<float>(r, c) > d_min)
 			{
-				Vec3f currPt = xyz.at<Vec3f>(r, c);
-				Vec3b currCol = epileft.at<Vec3b>(r, c);
+				cv::Vec3f currPt = xyz.at<cv::Vec3f>(r, c);
+				cv::Vec3b currCol = epileft.at<cv::Vec3b>(r, c);
 				output << currPt.val[0] << " " << currPt.val[1] << " " << currPt.val[2] << " " << int(currCol.val[0]) << " " << int(currCol.val[1]) << " " << int(currCol.val[2]) << endl;
 			}
 		}
@@ -112,26 +126,22 @@ void PtGenerator::setOutputPath(string out) {
 
 vector<string> PtGenerator::getFiles(string cate_dir)
 {
+	int len;
 	vector<string> files;//container for file names 
+	struct dirent *pDirent;
+	DIR *pDir;
 
-	_finddata_t file;
-	long lf;
-	//输入文件夹路径  
-	if ((lf = _findfirst(cate_dir.c_str(), &file)) == -1) {
-		cout << cate_dir << " not found!!!" << endl;
+	pDir = opendir(cate_dir.c_str());
+	if (pDir == NULL) {
+		printf("Cannot open directory '%s'\n", cate_dir.c_str());
 	}
-	else {
-		while (_findnext(lf, &file) == 0) {
-			//输出文件名  
-			//cout<<file.name<<endl;  
-			if (strcmp(file.name, ".") == 0 || strcmp(file.name, "..") == 0)
-				continue;
-			files.push_back(file.name);
-		}
-	}
-	_findclose(lf);
 
-	//排序，按从小到大排序  
-	sort(files.begin(), files.end());
+	while ((pDirent = readdir(pDir)) != NULL) {
+		//cout<< string(pDirent->d_name)<<endl;
+		if ((pDirent->d_name[0]) != '.')
+			files.push_back(string(pDirent->d_name));
+	}
+	closedir(pDir);
+	//sort(files.begin(), files.end());
 	return files;
 }

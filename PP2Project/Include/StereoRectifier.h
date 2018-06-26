@@ -6,7 +6,7 @@
 #include "opencv2/xfeatures2d.hpp"
 
 using namespace std;
-using namespace cv;
+//using namespace cv;
 
 //******************************************************************************************
 /*
@@ -26,18 +26,18 @@ public:
 
 	bool initExtrinsics(string fnExtrinsics);
 
-	inline Mat getK1() { return this->K1; }
-	inline Mat getK2() { return this->K2; }
-	inline Mat getP1() { return this->P1; }
-	inline Mat getP2() { return this->P2; }
-	inline Mat getQ() { return this->Q; }
+	inline cv::Mat getK1() { return this->K1; }
+	inline cv::Mat getK2() { return this->K2; }
+	inline cv::Mat getP1() { return this->P1; }
+	inline cv::Mat getP2() { return this->P2; }
+	inline cv::Mat getQ() { return this->Q; }
 
 	/*
 	// calculates the relative orientation by estimating and decomposing the essential matrix
 	// FeatureDescriptor = "SIFT" or "SURF" or "ORB" 
 	// return R and T
 	*/
-	bool calcRelativeOrientation(Mat &imgLeft, Mat &imgRight, string FeatureDescriptor, Mat &R, Mat &T, bool visualizeKeypts = false);
+	bool calcRelativeOrientation(cv::Mat &imgLeft, cv::Mat &imgRight, string FeatureDescriptor, cv::Mat &R, cv::Mat &T, bool visualizeKeypts = false);
 
 	/*
 	// calculates the rectifying rotation matrices R1 and R2 for left and right image
@@ -46,7 +46,7 @@ public:
 	//			P1, P2	---> new Projection matrices
 	//			Q		---> matrix needed for 3D reprojection
 	*/
-	bool calcRectification(Mat &R, Mat &T, Size &imgsize, Mat &R1, Mat &R2, Mat &P1, Mat &P2, Mat &Q);
+	bool calcRectification(cv::Mat &R, cv::Mat &T, cv::Size &imgsize, cv::Mat &R1, cv::Mat &R2, cv::Mat &P1, cv::Mat &P2, cv::Mat &Q);
 
 	/*
 	// calculates the rectified image
@@ -56,19 +56,19 @@ public:
 	//			imgSize	---> new image size
 	// Output:	imgR	---> rectified and undistorted image
 	*/
-	bool rectifyImages(Mat &img1, Mat &img2, Mat &imgR1, Mat &imgR2, Mat &Rrect1, Mat &Rrect2, Mat &Knew1, Mat &Knew2, Size &imgSize);
-	bool rectifyImages(Mat &img1, Mat &img2, Mat &imgR1, Mat &imgR2, Size &imgSize);
+	bool rectifyImages(cv::Mat &img1, cv::Mat &img2, cv::Mat &imgR1, cv::Mat &imgR2, cv::Mat &Rrect1, cv::Mat &Rrect2, cv::Mat &Knew1, cv::Mat &Knew2, cv::Size &imgSize);
+	bool rectifyImages(cv::Mat &img1, cv::Mat &img2, cv::Mat &imgR1, cv::Mat &imgR2, cv::Size &imgSize);
 
 	// calculates the three euler angles from a rotation matrix R
-	bool calcEulerAngles(Mat &R, Vec3f &eulerangles);
+	bool calcEulerAngles(cv::Mat &R, cv::Vec3f &eulerangles);
 
 	//====================================================================================================
 private:
 	// intrinsics
-	Mat K1, K2, d1, d2;
+	cv::Mat K1, K2, d1, d2;
 
 	//extrinsics
-	Mat R1, R2, P1, P2, Q;
+	cv::Mat R1, R2, P1, P2, Q;
 	
 	//====================================================================================================
 protected:

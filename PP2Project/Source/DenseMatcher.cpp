@@ -21,14 +21,14 @@ DenseMatcher::~DenseMatcher()
 }
 
 //====================================================================================================
-bool DenseMatcher::matchStereoPair(string fnEpi1, string fnEpi2, Mat &img1, Mat &img2, Mat &disp12, string matcherType)
+bool DenseMatcher::matchStereoPair(string fnEpi1, string fnEpi2, cv::Mat &img1, cv::Mat &img2, cv::Mat &disp12, string matcherType)
 {
 	bool ret = true;
-	img1 = imread(fnEpi1);
-	img2 = imread(fnEpi2);
+	img1 = cv::imread(fnEpi1);
+	img2 = cv::imread(fnEpi2);
 	if (matcherType == "ELAS")
 	{
-		Mat disp21;
+		cv::Mat disp21;
 		ElasMatcher matcher;
 		if (!matcher.match(img1, img2, disp12, disp21)) { ret = false; cerr << "Error calculating disparity image" << endl; return ret; }		// calculate disparity image
 

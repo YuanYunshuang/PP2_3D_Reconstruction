@@ -20,25 +20,24 @@
 #include "PtGenerator.h"
 
 using namespace std;
-using namespace cv;
 
 //****************************************************************************************************
 int main(int argc, char* argv[])
 {
 	//setting paths
-	string imgDirL = "E:/PraxisProjekt2/data/IKGVAN/Scenario_1/left/";
-	string imgDirR = "E:/PraxisProjekt2/data/IKGVAN/Scenario_1/right/";
+	string imgDirL = "G:/PP2/IKGVAN/left/";
+	string imgDirR = "G:/PP2/IKGVAN/right/";
 	string fnintrinsics = "E:/PraxisProjekt2/data/IKGVAN/intrinsics.txt";
 	string fnextrinsics = "E:/PraxisProjekt2/data/IKGVAN/extrinsics.txt";
-	string pEpileft = "E:/PraxisProjekt2/data/IKGVAN/Scenario_1/epileft/";
-	string pEpiright = "E:/PraxisProjekt2/data/IKGVAN/Scenario_1/epiright/";
-	string pPointCloud = "E:/PraxisProjekt2/data/IKGVAN/Scenario_1/pointcloud/";
+	string pEpileft = "G:/PP2/IKGVAN/epileftSmall/";
+	string pEpiright = "G:/PP2/IKGVAN/epirightSmall/";
+	string pPointCloud = "G:/PP2/IKGVAN/pointcloudSPSS/";
 
 	//get a new Pointcloud generator handle
 	PtGenerator ptg(fnintrinsics, fnextrinsics);
 	vector<string> ImgNames = ptg.getFiles(imgDirL); //get the filename list
 
-	for (int i = 73; i<ImgNames.size(); i++)
+	for (int i = 0; i<ImgNames.size(); i++)
 	{
 		string tmp = ImgNames[i].substr(0, ImgNames[i].length() - 4)+".txt"; // delete the extend of the image name
 		ptg.setOutputPath(pPointCloud+tmp);
@@ -54,7 +53,7 @@ int main(int argc, char* argv[])
 	
 	char tmp;
 	cin >> tmp;
-	waitKey(0);
+	cv::waitKey(0);
 	
 	return EXIT_SUCCESS;
 }
