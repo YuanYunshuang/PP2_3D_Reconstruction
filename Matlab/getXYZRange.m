@@ -4,9 +4,9 @@ close all
 fclose all;
 %###################
 % Listing the point cloud file name
-pcFileList = dir('E:\PraxisProjekt2\data\IKGVAN\scenario_1\pointcloud_global');
+pcFileList = dir('G:\PP2\New\ELAS\pointcloudELAS_global');
 pcFileList = pcFileList(3:end);
-filename = 'XYZRange.txt';
+filename = 'G:\PP2\New\ELAS\XYZRange.txt';
 if exist(filename,'file')==2
     delete(filename);
 end
@@ -17,7 +17,7 @@ X = [10e10,-10e10];
 Y = [10e10,-10e10];
 Z = [10e10,-10e10];
 for i=1:length(pcFileList)
-    filename = strcat('E:\PraxisProjekt2\data\IKGVAN\scenario_1\pointcloud_global\',pcFileList(i).name);
+    filename = strcat('G:\PP2\New\ELAS\pointcloudELAS_global\',pcFileList(i).name);
     pointcloud = importdata(filename);
     
     x= [10e10,-10e10];

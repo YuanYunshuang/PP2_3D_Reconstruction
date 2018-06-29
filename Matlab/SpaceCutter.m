@@ -18,11 +18,11 @@ close all
 clear all
 fclose('all');
 % Listing the point cloud file name
-pcFileList = dir('E:\PraxisProjekt2\data\IKGVAN\scenario_1\pointcloud_global');
+pcFileList = dir('G:\PP2\New\ELAS\pointcloudELAS_global');
 pcFileList = pcFileList(3:end);
 
 % read the XYZRange
-range = importdata('XYZRange.txt');
+range = importdata('G:\PP2\New\ELAS\XYZRange.txt');
 ranges = range.data(1:end-1,:);
 shift = [548000 548000 5804000 5804000 0 0];
 ranges = ranges-repmat(shift,length(ranges),1);
@@ -45,7 +45,7 @@ end
 % Filling the boxes
 for i=1:length(bx)
     filename = strcat(num2str(bx(i,1)),'.txt');
-    savepath =strcat( 'E:\PraxisProjekt2\data\IKGVAN\scenario_1\voxelGridBox\',filename);
+    savepath =strcat( 'G:\PP2\New\ELAS\Cubes15m\',filename);
     if exist(savepath,'file')==2
         delete(savepath);
     end
@@ -53,12 +53,12 @@ for i=1:length(bx)
     empty = 1;
     for j=1:length(ranges)
        if InRange(bx(i,2:end),ranges(j,:)) 
-           name = strcat('E:\PraxisProjekt2\data\IKGVAN\scenario_1\pointcloud_global\',pcFileList(j).name);
+           name = strcat('G:\PP2\New\ELAS\pointcloudELAS_global\',pcFileList(j).name);
            pc = importdata(name);
            pc(:,1:3) = pc(:,1:3)-repmat(shift(1:2:6),length(pc),1);
            for k=1:length(pc)
              if  PointInBox(bx(i,2:7),pc(k,1:3))
-                 fprintf(fileID,'%.6f %.6f %.6f %d %d %d\n',pc(k,:)+[shift(1:2:6),0, 0, 0]);
+                 fprintf(fileID,'%.6f %.6f %.6f %d %d %d\n',pc(k,:));
                  empty = 0;
              end
            end

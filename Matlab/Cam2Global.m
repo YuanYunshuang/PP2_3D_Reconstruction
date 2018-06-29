@@ -6,7 +6,7 @@ fclose('all');
 load('Trajectory.mat');
 load('timestamps_camera.mat');
 % Listing the point cloud file name
-pcFileList = dir('G:\PP2\New\ELAS\pointcloudELAS');
+pcFileList = dir('G:\PP2\New\SPSS\pointcloudSPSS');
 pcFileList = pcFileList(3:end);
 
 [ R,t, Rmm, Tmm ] = ParamGetter();
@@ -18,7 +18,7 @@ pointer = 3;
 
 for i=1:length(pcFileList)
     tic
-    filename = strcat('G:\PP2\New\ELAS\pointcloudELAS\',pcFileList(i).name);
+    filename = strcat('G:\PP2\New\SPSS\pointcloudSPSS\',pcFileList(i).name);
     pointcloud = importdata(filename);
     pointcloud(:,1:2) = -pointcloud(:,1:2);
     tmp = pcFileList(i).name;
@@ -43,7 +43,7 @@ for i=1:length(pcFileList)
   
     pointcloud_glob(:,1:3) = (R_BodyToGlobal*R_rpy*(Rmm'*(R*pointcloud(:,1:3)'...
         +repmat(t,1,l))-repmat(Tmm,1,l))+repmat(traj_t(2:4)',1,l))';
-    savepath =strcat( 'G:\PP2\New\ELAS\pointcloudELAS_global\',pcFileList(i).name);
+    savepath =strcat( 'G:\PP2\New\SPSS\pointcloudSPSS_global\',pcFileList(i).name);
 %      ptCloud = pointCloud(pointcloud_glob(:,1:3));
 %      pcshow(ptCloud);
     savePointCloud(savepath,pointcloud_glob);
