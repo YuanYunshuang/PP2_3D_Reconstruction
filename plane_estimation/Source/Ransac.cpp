@@ -55,8 +55,8 @@ void Ransac::PlanesEstimation(const char* filename, const char* outputpath)
 	{
 		while (fscanf(fp_txt, "%lf %lf %lf %d %d %d", &TxtPoint.x, &TxtPoint.y, &TxtPoint.z, &TxtPoint.r, &TxtPoint.g, &TxtPoint.b) != EOF)
 		{
-			TxtPoint.x = TxtPoint.x - 548800.0;
-			TxtPoint.y = TxtPoint.y - 5804500.0;
+			TxtPoint.x = TxtPoint.x ;//- 548800.0
+			TxtPoint.y = TxtPoint.y ;//- 5804500.0
 			m_vTxtPoints.push_back(TxtPoint);
 			//cout << TxtPoint.x << "," << TxtPoint.y << "," << TxtPoint.z << endl;
 		}
@@ -128,8 +128,8 @@ int Ransac::PlaneEstimation(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud,
 	// Mandatory
 	seg.setModelType(pcl::SACMODEL_PLANE);
 	seg.setMethodType(pcl::SAC_RANSAC);
-	seg.setDistanceThreshold(0.5);
-	seg.setMaxIterations(600);
+	seg.setDistanceThreshold(0.3);
+	seg.setMaxIterations(400);
 	//seg.setProbability(p);
 
 	seg.setInputCloud(cloud);

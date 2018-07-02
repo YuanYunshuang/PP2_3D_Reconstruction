@@ -33,8 +33,8 @@ void VoxelGridFilter::write2txt(const char* filename, pcl::PointCloud<pcl::Point
 		uint8_t r = (rgb >> 16) & 0x0000ff;
 		uint8_t g = (rgb >> 8) & 0x0000ff;
 		uint8_t b = (rgb) & 0x0000ff;
-		output << std::fixed << std::setprecision(6) << cloud->points[i].x + 548800.0 << " ";
-		output << std::fixed << std::setprecision(6) << cloud->points[i].y + 5804500.0 << " ";
+		output << std::fixed << std::setprecision(6) << cloud->points[i].x << " ";
+		output << std::fixed << std::setprecision(6) << cloud->points[i].y << " ";
 		output << std::fixed << std::setprecision(6) << cloud->points[i].z << " ";
 		output << (int)r << " " << (int)g << " " << (int)b << endl;
 	}
@@ -54,8 +54,8 @@ int VoxelGridFilter::Filter(const char* filename, const char* filtered_filename)
 	{
 		while (fscanf(fp_txt, "%lf %lf %lf %d %d %d", &TxtPoint.x, &TxtPoint.y, &TxtPoint.z, &TxtPoint.r, &TxtPoint.g, &TxtPoint.b) != EOF)
 		{
-			TxtPoint.x = TxtPoint.x - 548800.0;
-			TxtPoint.y = TxtPoint.y - 5804500.0;
+			TxtPoint.x = TxtPoint.x - 548000.0; //- 548800.0
+			TxtPoint.y = TxtPoint.y - 5804000.0; //- 5804500.0
 			m_vTxtPoints.push_back(TxtPoint);
 			//cout << TxtPoint.x << "," << TxtPoint.y << "," << TxtPoint.z << endl;
 		}
@@ -96,7 +96,7 @@ int VoxelGridFilter::Filter(const char* filename, const char* filtered_filename)
 	// Create the filtering object
 	pcl::VoxelGrid<pcl::PointXYZRGB> sor;
 	sor.setInputCloud(cloud);
-	sor.setLeafSize(0.5f, 0.5f, 0.5f);
+	sor.setLeafSize(0.05f, 0.05f, 0.05f);
 	sor.filter(*cloud_filtered);
 
 	std::cerr << "PointCloud after filtering: " << cloud_filtered->width * cloud_filtered->height

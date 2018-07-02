@@ -42,8 +42,8 @@ int main (int argc, char** argv)
 {
 
 
-	string path2pc = "D:\\PP2\\test";
-	string savePath = "D:\\PP2";
+	string path2pc = "G:\\PP2\\New\\ELAS\\pointcloudELAS_global_segments\\corner2";
+	string savePath = "G:\\PP2\\New\\ELAS\\PCL_gefiltert\\corner2";
 	vector<string> filenames = getFiles(path2pc);
 	string input = "";
 	string output = "";
