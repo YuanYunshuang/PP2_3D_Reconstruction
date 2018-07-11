@@ -6,21 +6,21 @@ fclose('all');
 load('Trajectory_sections.mat');
 shift = [548000 5804000 0 0 0 0];
 %%%%%%%%%%%%%%%%%%[ Get regression parameter for section # ]%%%%%%%%%%%%%%%%%%%
-X = [ones(size(Trajectory_sec3(:,2))) Trajectory_sec3(:,2)];
-a = regress(Trajectory_sec3(:,3),X); 
+X = [ones(size(Trajectory_sec1(:,2))) Trajectory_sec1(:,2)];
+a = regress(Trajectory_sec1(:,3),X); 
 norm_term = sqrt(a(2)^2+1);
 % Listing the point cloud file name
-pcFileList = dir('G:\PP2\New\ELAS\PCL_gefiltert\section3');
+pcFileList = dir('G:\PP2\New\ELAS\PCL_gefiltert\section1');
 pcFileList = pcFileList(3:end);
 
 for i=1:length(pcFileList)
-    filename = strcat('G:\PP2\New\ELAS\PCL_gefiltert\section3\',pcFileList(i).name);
+    filename = strcat('G:\PP2\New\ELAS\PCL_gefiltert\section1\',pcFileList(i).name);
     pointcloud = importdata(filename);
 %     pointcloud = pointcloud  - repmat(shift,length(pointcloud),1);
     fprintf('processing file "%s"\n',filename);
     name = pcFileList(i).name;
     name = name(1:end-4);
-    fn = strcat('G:\PP2\New\ELAS\left_right_road\section3\',name);
+    fn = strcat('G:\PP2\New\ELAS\left_right_road\section1\',name);
     fn1 = strcat(fn,'_left.txt');
     fn2 = strcat(fn,'_right.txt');
     fn3 = strcat(fn,'_floor.txt');
